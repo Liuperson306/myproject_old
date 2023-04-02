@@ -111,7 +111,7 @@ if st.session_state["page_num"] == 32:
         st.write(df)
         # 生成Excel文件链接
         buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             df.to_excel(writer, sheet_name='Sheet1', index=False)
             writer.save()
             download2 = st.download_button(
