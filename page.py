@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
+import io
 
 def QA(num):
     # 定义问题和选项
@@ -12,10 +13,6 @@ def QA(num):
     # 显示问题并获取用户的答案
     answer_1 = st.radio(label=question_1, options=options_1, key=fr"button{num}.1")
     answer_2 = st.radio(label=question_2, options=options_2, key=fr"button{num}.2")
-    # if not answer_1:
-    #     answer_1 = "The Left one looks more realistic"
-    # if not answer_2:
-    #     answer_2 = "The Left one is more in sync with audio"
 
     ans1 = get_ans(answer_1)
     ans2 = get_ans(answer_2)
@@ -67,22 +64,6 @@ def instrunction():
 # 注意事项
 instrunction()
 
-# 创建一个空的 DataFrame
-df = pd.DataFrame({'face': [''], 'lip': ['']})
-
-# 在 DataFrame 中添加 33 行空数据
-for i in range(33):
-    df.loc[i] = ['', '']
-
-# 在第二行第一列和第二列中写入数字 1
-df.loc[1, 'face'] = "1"
-df.loc[1, 'lip'] = "1"
-df.loc[1:31, ['face', 'lip']] = "1"  # 在第2行到第33行中，第1列和第2列都写入数字 1
-
-# 将 DataFrame 写入 Excel 文件
-df.to_excel('data_left1_right0.xlsx', index=False)
-
-
 # 定义页面跳转函数，同时清空页面内容
 def switch_page(page_num):
     st.session_state["page_num"] = page_num
@@ -91,6 +72,20 @@ def switch_page(page_num):
 # 通过 st.session_state 实现页面跳转
 if "page_num" not in st.session_state:
     st.session_state["page_num"] = 1
+    # 创建一个空的 DataFrame
+    df = pd.DataFrame({'face': [''], 'lip': ['']})
+
+    # 在 DataFrame 中添加 33 行空数据
+    for i in range(33):
+        df.loc[i] = ['', '']
+
+    # 在第二行第一列和第二列中写入数字 1
+    df.loc[1, 'face'] = "1"
+    df.loc[1, 'lip'] = "1"
+    df.loc[0:31, ['face', 'lip']] = "1"  # 在第2行到第33行中，第1列和第2列都写入数字 1
+
+    # 将 DataFrame 写入 Excel 文件
+    df.to_excel('data_left1_right0.xlsx', index=False)
 
 num = st.session_state["page_num"]
 # 显示页面内容
@@ -105,10 +100,30 @@ if num > 1 and num < 32:
         switch_page(st.session_state["page_num"] - 1)
     if col1.button("Next"):
         switch_page(st.session_state["page_num"] + 1)
+
 # 第1页和第32页
 if st.session_state["page_num"] == 32:
-    if st.button("Previous"):
+    col1, col2 = st.columns(2)
+    if col1.button("Submit results"):
+        # 读取Excel文件
+        df = pd.read_excel("data_left1_right0.xlsx")
+        # 显示文件内容
+        st.write(df)
+        # 生成Excel文件链接
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Sheet1', index=False)
+            writer.save()
+            download2 = st.download_button(
+                label="Download data as Excel",
+                data=buffer,
+                file_name='data_left1_right0.xlsx',
+                mime='application/vnd.ms-excel'
+             )
+            writer.close()
+    if col2.button("Previous"):
         switch_page(st.session_state["page_num"] - 1)
+
 
 if st.session_state["page_num"] == 1:
     if st.button("Next"):
