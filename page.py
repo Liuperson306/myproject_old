@@ -1,9 +1,78 @@
 import streamlit as st
-import pandas as pd
-import openpyxl
-import io
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+import time
 
-def QA(num):
+def main():
+    # 注意事项
+    instrunction()
+
+    # 定义页面跳转函数，同时清空页面内容
+    def switch_page(page_num):
+        st.session_state["page_num"] = page_num
+        st.session_state["data_face"] = data_face
+        st.session_state["data_lip"] = data_lip
+        st.experimental_rerun()  # 清空页面
+
+    # 通过 st.session_state 实现页面跳转
+    if "page_num" not in st.session_state:
+        st.session_state["page_num"] = 1
+
+    if "data_face" and "data_lip" not in st.session_state:
+        # 初始化data变量
+        data_face = [1 for x in range(0, 32)]
+        data_lip = [1 for x in range(0, 32)]
+    else:
+        # 恢复data变量的状态
+        data_face = st.session_state["data_face"]
+        data_lip = st.session_state["data_lip"]
+
+    # 显示页面内容
+    num = st.session_state["page_num"]
+    play_video(num)
+    QA(data_face, data_lip, num)
+
+    # 显示上一页和下一页按钮
+    # 第2页到31页
+    if num > 1 and num < 32:
+        col1, col2 = st.columns(2)
+        if col2.button("Previous"):
+            switch_page(st.session_state["page_num"] - 1)
+        if col1.button("Next"):
+            switch_page(st.session_state["page_num"] + 1)
+
+    # 第1页和第32页
+    if st.session_state["page_num"] == 32:
+        col1, col2 = st.columns(2)
+        if "button_clicked" not in st.session_state:
+            st.session_state.button_clicked = False
+
+        if not st.session_state.button_clicked:
+            btn = col1.button("Submit results")
+            if btn:
+                data_collection(data_face, data_lip)
+                st.session_state.button_clicked = True
+
+        if st.session_state.button_clicked == True:
+            url_link = "https://myproject.streamlit.app/"
+            link = f'<a href="{url_link}" target="_self">Exit system</a>'
+            st.markdown(link, unsafe_allow_html=True)
+        # if col1.markdown('Submit results'):
+        #     data_collection(data_face, data_lip)
+            # data = {"face": data_face, "lip": data_lip}
+            # # 绘制表格
+            # st.write("'1' means 'Left','0' means 'Right'")
+            # st.table(data)
+        if col2.button("Previous"):
+            switch_page(st.session_state["page_num"] - 1)
+
+    if st.session_state["page_num"] == 1:
+        if st.button("Next"):
+            switch_page(st.session_state["page_num"] + 1)
+
+def QA(data_face, data_lip, num):
     # 定义问题和选项
     question_1 = "Comparing the two full faces (Left and Right), which one looks more realistic?"
     options_1 = ["The Left one looks more realistic", "The Right one looks more realistic"]
@@ -14,11 +83,13 @@ def QA(num):
     answer_1 = st.radio(label=question_1, options=options_1, key=fr"button{num}.1")
     answer_2 = st.radio(label=question_2, options=options_2, key=fr"button{num}.2")
 
+    # 以1/0数据保存
     ans1 = get_ans(answer_1)
     ans2 = get_ans(answer_2)
 
-    # 在excel保存结果
-    output(num, ans1, ans2)
+    # 保存结果到列表
+    data_face[num-1] = ans1
+    data_lip[num-1] = ans2
 
 def get_ans(answer_str):
     if "Left" in answer_str:
@@ -26,27 +97,9 @@ def get_ans(answer_str):
     elif "Right" in answer_str:
         return "0"
 
-def output(num, ans1, ans2):
-    # 打开Excel文件
-    book = openpyxl.load_workbook('data_left1_right0.xlsx')
-    writer = pd.ExcelWriter("data_left1_right0.xlsx", engine='openpyxl')
-    writer.book = book
-
-    # 写入数据
-    sheet = book.active
-    sheet.cell(row=num+1, column=1, value=ans1)
-    sheet.cell(row=num+1, column=2, value=ans2)
-
-    # 关闭writer
-    writer.save()
-    writer.close()
-
-    # 关闭Excel文件
-    book.close()
-
 def play_video(num):
     st.subheader(fr"video{num}")
-    st.video(fr'{num}.mp4')
+    st.video(fr'video_syn\{num}.mp4')
     st.write("Please answer the following questions, after you watch the video. ")
 
 def instrunction():
@@ -60,72 +113,47 @@ def instrunction():
     st.write(text2)
     st.write(text3)
 
+def data_collection(data_face, data_lip):
+    # 发送内容
+    data1 = ''.join(str(x) for x in data_face)
+    data2 = ''.join(str(x) for x in data_lip)
+    string = "face:" + data1 + "\n" + "lip:" + data2
+    localtime = time.asctime(time.localtime(time.time()))
+    # 打开文件并指定写模式
+    file = open("data.txt", "w")
+    # 将字符串写入文件
+    file.write(string)
+    # 关闭文件
+    file.close()
+    # 发送邮件的账号和密码
+    sender_email = "m15507509432@163.com"  # 发送者邮箱
+    sender_password = "SGVSIFULLQWJGGZV"  # 发送者邮箱密码
 
-# 注意事项
-instrunction()
+    # 构建邮件主体
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = 'm15507509432@163.com'  # 收件人邮箱
+    msg['Subject'] = '数据收集' + localtime
 
-# 定义页面跳转函数，同时清空页面内容
-def switch_page(page_num):
-    st.session_state["page_num"] = page_num
-    st.experimental_rerun()
+    # 邮件正文
+    text = MIMEText('')
+    msg.attach(text)
 
-# 通过 st.session_state 实现页面跳转
-if "page_num" not in st.session_state:
-    st.session_state["page_num"] = 1
-    # 创建一个空的 DataFrame
-    df = pd.DataFrame({'face': [''], 'lip': ['']})
+    # 添加附件
+    with open('data.txt', 'rb') as f:
+        attachment = MIMEApplication(f.read())
+        attachment.add_header('Content-Disposition', 'attachment', filename='data.txt')
+        msg.attach(attachment)
 
-    # 在 DataFrame 中添加 33 行空数据
-    for i in range(33):
-        df.loc[i] = ['', '']
+    # 发送邮件
+    try:
+        smtp = smtplib.SMTP('smtp.163.com')
+        smtp.login(sender_email, sender_password)
+        smtp.sendmail(sender_email, ['m15507509432@163.com'], msg.as_string())
+        smtp.quit()
+        print('邮件发送成功')
+    except smtplib.SMTPException as e:
+        print('邮件发送失败，错误信息：', e)
 
-    # 在第二行第一列和第二列中写入数字 1
-    df.loc[1, 'face'] = "1"
-    df.loc[1, 'lip'] = "1"
-    df.loc[0:31, ['face', 'lip']] = "1"  # 在第2行到第33行中，第1列和第2列都写入数字 1
-
-    # 将 DataFrame 写入 Excel 文件
-    df.to_excel('data_left1_right0.xlsx', index=False)
-
-num = st.session_state["page_num"]
-# 显示页面内容
-play_video(num)
-QA(num)
-
-# 显示上一页和下一页按钮
-# 第2页到31页
-if num > 1 and num < 32:
-    col1, col2 = st.columns(2)
-    if col2.button("Previous"):
-        switch_page(st.session_state["page_num"] - 1)
-    if col1.button("Next"):
-        switch_page(st.session_state["page_num"] + 1)
-
-# 第1页和第32页
-if st.session_state["page_num"] == 32:
-    col1, col2 = st.columns(2)
-    if col1.button("Submit results"):
-        # 读取Excel文件
-        df = pd.read_excel("data_left1_right0.xlsx")
-        # 显示文件内容
-        st.write(df)
-        # 生成Excel文件链接
-        buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-            df.to_excel(writer, sheet_name='Sheet1', index=False)
-            writer.save()
-            download2 = st.download_button(
-                label="Download data as Excel",
-                data=buffer,
-                file_name='data_left1_right0.xlsx',
-                mime='application/vnd.ms-excel'
-             )
-            writer.close()
-    if col2.button("Previous"):
-        switch_page(st.session_state["page_num"] - 1)
-
-
-if st.session_state["page_num"] == 1:
-    if st.button("Next"):
-        switch_page(st.session_state["page_num"] + 1)
-
+if __name__ == "__main__":
+    main()
