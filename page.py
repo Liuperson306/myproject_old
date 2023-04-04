@@ -99,7 +99,7 @@ def get_ans(answer_str):
 
 def play_video(num):
     st.subheader(fr"video{num}")
-    st.video(fr'video_syn\{num}.mp4')
+    st.video(fr'{num}.mp4')
     st.write("Please answer the following questions, after you watch the video. ")
 
 def instrunction():
