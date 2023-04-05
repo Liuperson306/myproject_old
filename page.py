@@ -56,12 +56,7 @@ def main():
                 st.session_state.button_clicked = True
 
         if st.session_state.button_clicked == True:
-            url_link = "https://myproject.streamlit.app/"
-            link = f'<a href="{url_link}" target="_self">Exit system</a>'
-            st.markdown(link, unsafe_allow_html=True)
-        # if col1.markdown('Submit results'):
-        #     data_collection(data_face, data_lip)
-            # data = {"face": data_face, "lip": data_lip}
+            st.subheader("Successfully submitted the result. Thank you for using it. Now you can exit the system.") 
             # # 绘制表格
             # st.write("'1' means 'Left','0' means 'Right'")
             # st.table(data)
