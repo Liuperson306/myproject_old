@@ -56,7 +56,12 @@ def main():
                 st.session_state.button_clicked = True
 
         if st.session_state.button_clicked == True:
-            st.subheader("Successfully submitted the result. Thank you for using it. Now you can exit the system.") 
+            progress_bar = st.progress(0) # 定义进度条，初始值为0
+            for percent_complete in range(101): # 逐渐增加进度条的值
+                time.sleep(0.03) # 休眠3/100秒以滴答声逐渐增加
+                progress_bar.progress(percent_complete) # 将当前的进度条值显示出来
+            st.subheader("Successfully submitted the results. Thank you for using it. Now you can exit the system.") 
+            
             # # 绘制表格
             # st.write("'1' means 'Left','0' means 'Right'")
             # st.table(data)
