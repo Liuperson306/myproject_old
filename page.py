@@ -60,7 +60,9 @@ def main():
             for percent_complete in range(101): # 逐渐增加进度条的值
                 time.sleep(0.03) # 休眠3/100秒以滴答声逐渐增加
                 progress_bar.progress(percent_complete) # 将当前的进度条值显示出来
+            st.balloons
             st.subheader("Successfully submitted the results. Thank you for using it. Now you can exit the system.") 
+            st.success
             
             # # 绘制表格
             # st.write("'1' means 'Left','0' means 'Right'")
@@ -71,7 +73,8 @@ def main():
     if st.session_state["page_num"] == 1:
         if st.button("Next"):
             switch_page(st.session_state["page_num"] + 1)
-
+            
+@st.cache
 def QA(data_face, data_lip, num):
     # 定义问题和选项
     question_1 = "Comparing the two full faces (Left and Right), which one looks more realistic?"
@@ -91,17 +94,18 @@ def QA(data_face, data_lip, num):
     data_face[num-1] = ans1
     data_lip[num-1] = ans2
 
+@st.cache
 def get_ans(answer_str):
     if "Left" in answer_str:
         return "1"
     elif "Right" in answer_str:
         return "0"
-
+@st.cache
 def play_video(num):
     st.subheader(fr"video{num}")
     st.video(fr'{num}.mp4')
     st.write("Please answer the following questions, after you watch the video. ")
-
+@st.cache
 def instrunction():
     st.subheader("Instructions: ")
     text1 = 'Please watch the four short videos (duration 4~7s) of two animated talking heads. \
