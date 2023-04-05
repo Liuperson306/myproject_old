@@ -50,8 +50,8 @@ def main():
             st.session_state.button_clicked = False
 
         if not st.session_state.button_clicked:
-            btn = col1.button("Submit results")
-            if btn:
+            #btn = col1.button("Submit results")
+            if col1.button("Submit results"):
                 data_collection(data_face, data_lip)
                 st.session_state.button_clicked = True
 
