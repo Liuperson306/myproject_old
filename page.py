@@ -58,7 +58,7 @@ def main():
         if st.session_state.button_clicked == True:
             progress_bar = st.progress(0) # 定义进度条，初始值为0
             for percent_complete in range(101): # 逐渐增加进度条的值
-                time.sleep(0.03) # 休眠3/100秒以滴答声逐渐增加
+                time.sleep(0.02) # 休眠2秒以滴答声逐渐增加
                 progress_bar.progress(percent_complete) # 将当前的进度条值显示出来
             st.balloons()
             st.success("Successfully submitted the results. Thank you for using it. Now you can exit the system.", icon="✅")
