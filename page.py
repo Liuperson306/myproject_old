@@ -135,7 +135,7 @@ def data_collection(data_face, data_lip):
     msg = MIMEMultipart()
     msg['From'] = sender_email
     msg['To'] = 'm15507509432@163.com'  # 收件人邮箱
-    msg['Subject'] = 'data collection' + localtime
+    msg['Subject'] = 'data ' + localtime
 
     # 邮件正文
     text = MIMEText('')
