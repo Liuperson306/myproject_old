@@ -149,9 +149,9 @@ def data_collection(data_face, data_lip):
     msg.attach(text)
 
     # 添加附件
-    with open('data.txt', 'rb') as f:
+    with open(file_name, 'rb') as f:
         attachment = MIMEApplication(f.read())
-        attachment.add_header('Content-Disposition', 'attachment', filename='data.txt')
+        attachment.add_header('Content-Disposition', 'attachment', filename=file_name)
         msg.attach(attachment)
 
     # 发送邮件
