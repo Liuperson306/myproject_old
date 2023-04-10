@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import time
 
+
 def main():
     # 注意事项
     instrunction()
@@ -50,19 +51,20 @@ def main():
             st.session_state.button_clicked = False
 
         if not st.session_state.button_clicked:
-            #btn = col1.button("Submit results")
+            # btn = col1.button("Submit results")
             if col1.button("Submit results"):
                 data_collection(data_face, data_lip)
                 st.session_state.button_clicked = True
 
         if st.session_state.button_clicked == True:
-            progress_bar = st.progress(0) # 定义进度条，初始值为0
-            for percent_complete in range(101): # 逐渐增加进度条的值
-                time.sleep(0.02) # 休眠2秒以滴答声逐渐增加
-                progress_bar.progress(percent_complete) # 将当前的进度条值显示出来
+            progress_bar = st.progress(0)  # 定义进度条，初始值为0
+            for percent_complete in range(101):  # 逐渐增加进度条的值
+                time.sleep(0.02)  # 休眠2秒以滴答声逐渐增加
+                progress_bar.progress(percent_complete)  # 将当前的进度条值显示出来
             st.balloons()
-            st.success("Successfully submitted the results. Thank you for using it. Now you can exit the system.", icon="✅")
-            
+            st.success("Successfully submitted the results. Thank you for using it. Now you can exit the system.",
+                       icon="✅")
+
             # # 绘制表格
             # st.write("'1' means 'Left','0' means 'Right'")
             # st.table(data)
@@ -72,7 +74,8 @@ def main():
     if st.session_state["page_num"] == 1:
         if st.button("Next"):
             switch_page(st.session_state["page_num"] + 1)
-            
+
+
 def QA(data_face, data_lip, num):
     # 定义问题和选项
     question_1 = "Comparing the two full faces (Left and Right), which one looks more realistic?"
@@ -89,8 +92,8 @@ def QA(data_face, data_lip, num):
     ans2 = get_ans(answer_2)
 
     # 保存结果到列表
-    data_face[num-1] = ans1
-    data_lip[num-1] = ans2
+    data_face[num - 1] = ans1
+    data_lip[num - 1] = ans2
 
 
 def get_ans(answer_str):
@@ -99,10 +102,12 @@ def get_ans(answer_str):
     elif "Right" in answer_str:
         return "0"
 
+
 def play_video(num):
     st.subheader(fr"video{num}")
     st.video(fr'{num}.mp4')
     st.write("Please answer the following questions, after you watch the video. ")
+
 
 def instrunction():
     st.subheader("Instructions: ")
@@ -115,14 +120,16 @@ def instrunction():
     st.write(text2)
     st.write(text3)
 
+
 def data_collection(data_face, data_lip):
     # 发送内容
     data1 = ''.join(str(x) for x in data_face)
     data2 = ''.join(str(x) for x in data_lip)
     string = "face:" + data1 + "\n" + "lip:" + data2
-    localtime = time.asctime(time.localtime(time.time()))
+    localtime = time.strftime('%Y-%m-%d %H-%M-%S', time.localtime())
     # 打开文件并指定写模式
-    file = open("data.txt", "w")
+    file_name = "data " + localtime + ".txt"
+    file = open(file_name, "w")
     # 将字符串写入文件
     file.write(string)
     # 关闭文件
@@ -156,6 +163,7 @@ def data_collection(data_face, data_lip):
         print('邮件发送成功')
     except smtplib.SMTPException as e:
         print('邮件发送失败，错误信息：', e)
+
 
 if __name__ == "__main__":
     main()
